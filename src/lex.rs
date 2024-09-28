@@ -1,5 +1,5 @@
 #[derive(Debug, PartialEq, Eq)]
-enum Kind {
+pub enum Kind {
     Add,
     Sub,
     Mul,
@@ -40,7 +40,7 @@ enum Started {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Token {
-    kind: Kind,
+    pub kind: Kind,
     start: usize,
     length: usize,
 }
@@ -61,6 +61,7 @@ impl std::fmt::Display for Token {
     }
 }
 
+#[derive(Clone)]
 pub struct Lexer<'src> {
     pub ix: usize,
     pub src: &'src str,
@@ -130,24 +131,24 @@ impl<'src> Iterator for Lexer<'src> {
 }
 
 #[derive(Debug)]
-pub struct DisplayToken<'src> {
-    src: &'src str,
-    token: Token,
+pub struct DisplayToken<'src, 'tok> {
+    pub src: &'src str,
+    pub token: &'tok Token,
 }
 
-impl<'src> DisplayToken<'src> {
-    pub fn new(src: &'src str, token: Token) -> Self {
+impl<'src, 'tok> DisplayToken<'src, 'tok> {
+    pub fn new(src: &'src str, token: &'tok Token) -> Self {
         DisplayToken { src, token }
     }
 }
 
-impl<'src> std::fmt::Display for DisplayToken<'src> {
+impl<'src, 'tok> std::fmt::Display for DisplayToken<'src, 'tok> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let start = self.token.start;
         let end = start + self.token.length;
 
         let tok_str = &self.src[start..end];
-        write!(f, " [{}] ", tok_str)
+        write!(f, "{}", tok_str)
     }
 }
 
