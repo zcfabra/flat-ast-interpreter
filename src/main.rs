@@ -1,5 +1,3 @@
-use std::hint::unreachable_unchecked;
-
 struct AstRef(i32);
 struct AstPool(Vec<AstRef>);
 
@@ -167,15 +165,19 @@ fn main() {
 }
 
 #[test]
-fn test_lexer() {
+fn test_basic_lexing() {
     let cases = vec![
         (
-            "++--",
+            "++--**//",
             vec![
                 Token::new(Kind::Add, 0, 1),
                 Token::new(Kind::Add, 1, 1),
                 Token::new(Kind::Sub, 2, 1),
                 Token::new(Kind::Sub, 3, 1),
+                Token::new(Kind::Mul, 4, 1),
+                Token::new(Kind::Mul, 5, 1),
+                Token::new(Kind::Div, 6, 1),
+                Token::new(Kind::Div, 7, 1),
             ],
         ),
         (
@@ -206,4 +208,19 @@ fn test_lexer() {
         let found = Lexer::new(input).collect::<Vec<Token>>();
         assert_eq!(found, output);
     }
+}
+
+#[test]
+fn test_whitespace() {
+    let results = Lexer::new("          10          +          10          ")
+        .into_iter()
+        .collect::<Vec<Token>>();
+    assert_eq!(
+        results,
+        vec![
+            Token::new(Kind::Num, 10, 2),
+            Token::new(Kind::Add, 22, 1),
+            Token::new(Kind::Num, 33, 2),
+        ]
+    )
 }
