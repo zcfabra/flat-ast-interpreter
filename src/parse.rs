@@ -15,6 +15,14 @@ impl AstPool {
         return self.display_expr(root, src);
     }
 
+    pub fn push_expr(&mut self, expr: AstExpr) -> usize {
+        let ix = self.len();
+
+        self.push(expr);
+
+        return ix;
+    }
+
     fn display_expr(&self, node: &AstExpr, src: &str) -> String {
         match node {
             AstExpr::Literal(token) => DisplayToken::new(src, token).to_string(),
@@ -24,7 +32,7 @@ impl AstPool {
                 let l_repr = self.display_expr(self.0.get(l.0).expect("Invalid Index"), src);
                 let r_repr = self.display_expr(self.0.get(r.0).expect("Invalid Index"), src);
 
-                return format!("( {} {} {} )", op, l_repr, r_repr);
+                return format!("( {} {} {} )", l_repr, op, r_repr);
             }
         }
     }
@@ -110,12 +118,10 @@ where
 
         let op = tokens.next().expect("Should Have Checked Token Already");
 
-        let lhs_ix = pool.len();
-        pool.push(lhs_expr);
+        let lhs_ix = pool.push_expr(lhs_expr);
 
         let rhs_expr = parse_expr(tokens, pool, encountered_prec)?;
-        let rhs_ix = pool.len();
-        pool.push(rhs_expr);
+        let rhs_ix = pool.push_expr(rhs_expr);
 
         lhs_expr = AstExpr::BinOp(AstRef(lhs_ix), op, AstRef(rhs_ix))
     }
